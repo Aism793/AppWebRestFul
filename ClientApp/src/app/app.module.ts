@@ -37,9 +37,9 @@ import { AppRoutingModule } from './app-routing.module';
       { path: 'fetch-data', component: FetchDataComponent },
     ]),
     HttpClientModule,
-    HttpClientInMemoryWebApiModule.forRoot(
+    /*.forRoot(
       InMemoryDataService, { dataEncapsulation: false }
-    ),
+    ),*/
     AppRoutingModule
   ],
   providers: [],

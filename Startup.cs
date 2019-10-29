@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using TaskSharpHTTP.Models;
+using Microsoft.OpenApi.Models;
+using System;
 
 namespace AppWebRestFul
 {
@@ -23,13 +25,38 @@ namespace AppWebRestFul
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TaskContext>(opt=>
-            opt.UseInMemoryDatabase("TaskBD"));
+            opt.UseSqlServer(@"Server=DESKTOP-K6MAC0O\SQLEXPRESS;Database=TaskDB;Trusted_Connection=True;"));
             services.AddControllersWithViews();
+
+            //Register the Swagger services
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "Task API",
+                    Description = "Task API - ASP.NET Core Web API",
+                    TermsOfService = new Uri("https://cla.dotnetfoundation.org/"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Unicesar",
+                        Email = string.Empty,
+                        Url = new Uri("https://github.com/borisgr04/CrudNgDotNetCore3"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Licencia dotnet foundation",
+                        Url = new Uri("https://www.byasystems.co/license"),
+                    }
+                });
+            });
+
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,19 +75,26 @@ namespace AppWebRestFul
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            if (!env.IsDevelopment())
-            {
-                app.UseSpaStaticFiles();
-            }
+            app.UseSpaStaticFiles();
+            
 
             app.UseRouting();
-
+            app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
             });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(
+                options =>
+                {
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Signus Prespuesto v1");
+                }
+            );
 
             app.UseSpa(spa =>
             {
@@ -74,6 +108,7 @@ namespace AppWebRestFul
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
+         
         }
     }
 }

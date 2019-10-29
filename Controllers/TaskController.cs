@@ -18,9 +18,9 @@ namespace TaskSharpHTTP.Controllers
            if(_context.TaskItems.Count()==0)
            {
                _context.TaskItems.Add(new TaskItem 
-               {Id=1, Title="Priorizar el proyecto", Description="Priorizar", Priority=true});
+               {Title="Priorizar el proyecto", Description="Priorizar", Priority=true});
                _context.TaskItems.Add(new TaskItem 
-               {Id=2, Title="Calendario del proyecto", Description="Priorizar", Priority=true});
+               { Title="Calendario del proyecto", Description="Priorizar", Priority=true});
                _context.SaveChanges();
            }
        }
@@ -39,5 +39,41 @@ namespace TaskSharpHTTP.Controllers
            }
            return taskItem;
        }
+       [HttpPost]
+       public async Task<ActionResult<TaskItem>> PostTaskItem(TaskItem item)
+       {
+           _context.TaskItems.Add(item);
+           await _context.SaveChangesAsync();
+           return CreatedAtAction(nameof(GetTaskItem), new {id=item.Id}, item);
+       }
+       [HttpPut("{id}")]
+       public async Task<IActionResult> PutTaskItem(int id, TaskItem item)
+       {
+           if(id!=item.Id)
+           {
+               return BadRequest();
+           }
+
+           _context.Entry(item).State = EntityState.Modified;
+           await _context.SaveChangesAsync();
+
+           return NoContent();
+       }
+       [HttpDelete("{id}")]
+       public async Task<IActionResult> DeleteTaskItem(int id){
+           var TaskItem = await
+           _context.TaskItems.FindAsync(id);
+
+           if(TaskItem==null)
+           {
+               return NotFound();
+           }
+
+           _context.TaskItems.Remove(TaskItem);
+           await _context.SaveChangesAsync();
+
+           return NoContent();
+       }
+
    }
 }
